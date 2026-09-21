@@ -9,7 +9,11 @@ on:
 jobs:
   build:
     name: Compila APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
       - name: Scarica il codice
@@ -21,19 +25,22 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Configura Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accetta licenze Android
-        run: yes | sdkmanager --licenses || true
-
-      - name: Installa componenti Android
+      - name: Controlla Android SDK
         run: |
-          sdkmanager "platform-tools"
-          sdkmanager "platforms;android-34"
-          sdkmanager "build-tools;34.0.0"
-          sdkmanager "cmake;3.22.1"
-          sdkmanager "ndk;25.2.9519653"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls -la "$ANDROID_HOME"
+          "$ANDROID_HOME/platform-tools/adb" version || true
+
+      - name: Installa eventuali componenti mancanti
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "cmake;3.22.1" \
+            "ndk;25.2.9519653"
 
       - name: Rendi eseguibile Gradle
         run: chmod +x gradlew
