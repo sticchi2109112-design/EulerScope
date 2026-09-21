@@ -1,4 +1,4 @@
-name: Build EulerScope APK
+name: Crea APK EulerScope
 
 on:
   workflow_dispatch:
@@ -8,13 +8,14 @@ on:
 
 jobs:
   build:
+    name: Compila APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Scarica il codice
         uses: actions/checkout@v4
 
-      - name: Configura Java
+      - name: Configura Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -23,13 +24,16 @@ jobs:
       - name: Configura Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Installa Android SDK
+      - name: Accetta licenze Android
+        run: yes | sdkmanager --licenses || true
+
+      - name: Installa componenti Android
         run: |
-          sdkmanager "platform-tools" \
-                     "platforms;android-34" \
-                     "build-tools;34.0.0" \
-                     "cmake;3.22.1" \
-                     "ndk;25.2.9519653"
+          sdkmanager "platform-tools"
+          sdkmanager "platforms;android-34"
+          sdkmanager "build-tools;34.0.0"
+          sdkmanager "cmake;3.22.1"
+          sdkmanager "ndk;25.2.9519653"
 
       - name: Rendi eseguibile Gradle
         run: chmod +x gradlew
@@ -37,7 +41,7 @@ jobs:
       - name: Compila APK
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Pubblica APK
+      - name: Salva APK
         uses: actions/upload-artifact@v4
         with:
           name: EulerScope-APK
