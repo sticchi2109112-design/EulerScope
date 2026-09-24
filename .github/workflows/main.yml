@@ -42,11 +42,13 @@ jobs:
             "cmake;3.22.1" \
             "ndk;25.2.9519653"
 
-      - name: Rendi eseguibile Gradle
-        run: chmod +x gradlew
+                - name: Installa Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
 
       - name: Compila APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Salva APK
         uses: actions/upload-artifact@v4
